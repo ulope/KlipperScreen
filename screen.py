@@ -25,6 +25,7 @@ from ks_includes.KlippyGtk import KlippyGtk
 from ks_includes.printer import Printer
 from ks_includes.widgets.keyboard import Keyboard
 from ks_includes.config import KlipperScreenConfig
+from ks_includes.action_prompt_handler import ActionPromptHandler
 from panels.base_panel import BasePanel
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -93,6 +94,7 @@ class KlipperScreen(Gtk.Window):
     popup_timeout = None
     wayland = False
     windowed = False
+    action_prompt_handler = None
 
     def __init__(self, args, version):
         try:
@@ -107,6 +109,7 @@ class KlipperScreen(Gtk.Window):
         self.dialogs = []
         self.confirm = None
         self.panels_reinit = []
+        self.action_prompt_handler = ActionPromptHandler(self)
 
         configfile = os.path.normpath(os.path.expanduser(args.configfile))
 
@@ -755,6 +758,8 @@ class KlipperScreen(Gtk.Window):
                     self.show_popup_message(data[6:], 1)
                 elif data.startswith("!! "):
                     self.show_popup_message(data[3:], 3)
+                elif data.startswith("// action:prompt_"):
+                    self.action_prompt_handler.process_update(data)
                 elif "unknown" in data.lower() and \
                         not ("TESTZ" in data or "MEASURE_AXES_NOISE" in data or "ACCELEROMETER_QUERY" in data):
                     self.show_popup_message(data)
