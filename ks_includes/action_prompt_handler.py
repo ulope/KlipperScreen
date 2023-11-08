@@ -163,12 +163,28 @@ class ActionPromptHandler:
         content.pack_start(label, True, True, 0)
 
         for choice in self.prompt.contents:
-            button = Gtk.Button(label=choice.label)
-            button.set_hexpand(True)
-            button.set_vexpand(True)
-            button.connect("clicked", partial(self.choice_clicked, choice))
-            button.get_style_context().add_class("message_popup_button")
-            content.pack_start(button, True, True, 0)
+            if isinstance(choice, str):
+                label = Gtk.Label()
+                label.set_markup(choice)
+                content.pack_start(label, True, True, 0)
+            elif isinstance(choice, ButtonGroup):
+                group = Gtk.Box(spacing=6)
+                group.set_orientation(Gtk.Orientation.HORIZONTAL)
+                for group_button in choice.buttons:
+                    button = Gtk.Button(label=group_button.label)
+                    button.set_hexpand(True)
+                    button.set_vexpand(True)
+                    button.connect("clicked", partial(self.choice_clicked, group_button))
+                    button.get_style_context().add_class("message_popup_button")
+                    group.pack_start(button, True, True, 0)
+                content.pack_start(group, True, True, 0)
+            elif isinstance(choice, Button):
+                button = Gtk.Button(label=choice.label)
+                button.set_hexpand(True)
+                button.set_vexpand(True)
+                button.connect("clicked", partial(self.choice_clicked, choice))
+                button.get_style_context().add_class("message_popup_button")
+                content.pack_start(button, True, True, 0)
 
         self.prompt_window = self.screen.gtk.Dialog(
             self.prompt.title,
