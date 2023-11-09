@@ -27,13 +27,13 @@ class PromptActions(Enum):
 
 
 ACTION_STATE_MAP = {
-    PromptActions.BEGIN: PrompState.IDLE,
-    PromptActions.BUTTON: PrompState.BUILDING,
-    PromptActions.TEXT: PrompState.BUILDING,
-    PromptActions.BUTTON_GROUP_START: PrompState.BUILDING,
-    PromptActions.BUTTON_GROUP_END: PrompState.BUILDING,
-    PromptActions.SHOW: PrompState.BUILDING,
-    PromptActions.CLOSE: None,
+    PromptActions.BEGIN: {PrompState.IDLE},
+    PromptActions.BUTTON: {PrompState.BUILDING},
+    PromptActions.TEXT: {PrompState.BUILDING},
+    PromptActions.BUTTON_GROUP_START: {PrompState.BUILDING},
+    PromptActions.BUTTON_GROUP_END: {PrompState.BUILDING},
+    PromptActions.SHOW: {PrompState.BUILDING, PrompState.ACTIVE},
+    PromptActions.CLOSE: None,  # None means all states allowed
 }
 
 
@@ -91,8 +91,8 @@ class ActionPromptHandler:
             logging.info(f"APH: Unknown action: {action_str}")
             return
 
-        allowed_state = ACTION_STATE_MAP[action]
-        if allowed_state and self.state is not allowed_state:
+        allowed_states = ACTION_STATE_MAP[action]
+        if allowed_states and self.state not in allowed_states:
             logging.info(f"APH: Wrong state for '{action.value}': {self.state}")
             return
 
@@ -151,6 +151,10 @@ class ActionPromptHandler:
 
     def show_prompt(self):
         self.screen.close_screensaver()
+
+        if self.state is PrompState.ACTIVE:
+            logging.info(f"APH.show_prompt: state: active, prompt_window: {self.prompt_window}")
+            return
 
         def _response(dialog, response):
             self.dismiss_prompt()
