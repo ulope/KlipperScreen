@@ -196,6 +196,8 @@ class ActionPromptHandler:
             content,
             _response
         )
+        # Make sure our internal state is consistent with the dialog state
+        self.prompt_window.connect("destroy", self.dismiss_prompt)
 
     def dismiss_prompt(self, *_args):
         logging.info(f"APH.dismiss_prompt")
